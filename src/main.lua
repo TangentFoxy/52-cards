@@ -99,7 +99,7 @@ function love.draw()
         else
             if hovering == "Card" then
                 --deck over card
-                lg.print("Left click to place deck (will place card underneath on the bottom of the deck). Right click to flip cards in the deck.", 2, lg.getHeight() - 14)
+                lg.print("Left click to place deck (will not interact with card underneath). Right click to flip cards in the deck.", 2, lg.getHeight() - 14)
             elseif hovering == "Deck" then
                 --deck over deck
                 lg.print("Left click to place deck (will not interact with deck underneath). Scroll up to add this deck on top, scroll down to add this deck on bottom. Right click to flip cards in this deck.", 2, lg.getHeight() - 14)
@@ -121,6 +121,16 @@ function love.mousepressed(x, y, button)
                 end
             end
         elseif holding:isInstanceOf(Deck) then
+            --[[
+            local item = false
+
+            for i=#items,1,-1 do
+                if isOnItem(x, y, items[i]) then
+                    item = i
+                end
+            end
+            --]]
+
             holding:moveTo(x, y)
             insert(items, holding)
             holding = false
@@ -130,6 +140,7 @@ function love.mousepressed(x, y, button)
             for i=#items,1,-1 do
                 if isOnItem(x, y, items[i]) then
                     item = i
+                    break
                 end
             end
 
