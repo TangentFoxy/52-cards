@@ -64,8 +64,11 @@ function Deck:shuffleCards()
 end
 
 function Deck:shuffleIn(card) --TODO make capable of handling multiple cards
-    --
+    --insert(self.cards, random(1, #self.cards)) --no, we shuffle everything!
+    insert(self.cards, card)
+    self:shuffleCards()
 end
+--TODO ? placeIn() to randomly place within without shuffling whole deck?
 
 function Deck:drawCards(count)
     if count and (count > 1) then
@@ -101,6 +104,10 @@ function Deck:placeCardsUnder(cards)
     else
         insert(self.cards, cards, 1)
     end
+end
+
+function Deck:getCards()
+    return self.cards
 end
 
 return Deck

@@ -35,23 +35,9 @@ function Card:draw(face, x, y, r)
         if self.rank == "Joker" then
             lg.print("Joker", cornerOffset - Card.static.width/2, cornerOffset - Card.static.height/2)
             -- I wanted this to be a symbol for a suit, but the Joker doesn't have one!
-            lg.print("#") --used to be "J"
+            lg.print("#")
         else
-            lg.print(self.rank .. " of " .. self.suit, cornerOffset - Card.static.width/2, cornerOffset - height/2)
-            -- I wanted these to be symbols for suits, but for some reason I made them ranks
-            --[[
-            if self.rank == "Ace" then
-                lg.print("A")
-            elseif self.rank == "Jack" then
-                lg.print("J")
-            elseif self.rank == "Queen" then
-                lg.print("Q")
-            elseif self.rank == "King" then
-                lg.print("K")
-            else
-                lg.print(self.rank)
-            end
-            --]]
+            lg.print(self.rank .. " of " .. self.suit, cornerOffset - Card.static.width/2, cornerOffset - Card.static.height/2)
             if self.suit == "Clubs" then
                 lg.print("♣")
             elseif self.suit == "Diamonds" then

@@ -99,7 +99,7 @@ function love.draw()
         else
             if hovering == "Card" then
                 --deck over card
-                lg.print("Left click to place deck (will not shuffle card underneath into the deck). Right click to flip cards in the deck.", 2, lg.getHeight() - 14)
+                lg.print("Left click to place deck (will place card underneath on the bottom of the deck). Right click to flip cards in the deck.", 2, lg.getHeight() - 14)
             elseif hovering == "Deck" then
                 --deck over deck
                 lg.print("Left click to place deck (will not interact with deck underneath). Scroll up to add this deck on top, scroll down to add this deck on bottom. Right click to flip cards in this deck.", 2, lg.getHeight() - 14)
@@ -112,15 +112,6 @@ function love.draw()
 end
 
 function love.mousepressed(x, y, button)
-    --[[ ORIGINAL TEXT, NOT ACCURATE
-    Left click will grab a card or deck.
-    While holding a card: Left click will place it (as long as the mouse is not over a deck).
-    While holding a card over a deck: Scroll up to place it on top of the deck, scroll down to place it on the bottom of the deck. Right click to shuffle it into the deck.
-    While holding a deck: Left click will place it (as long as the mouse is not over a deck).
-    While holding a deck over a deck: Scroll up to place it on top of the deck, scroll down to place it on the bottom of the deck. Right click to shuffle the decks together.
-    While NOT holding anything: Right click a card to flip it, or right click a deck to flip the cards in it (does not flip order of cards). Scroll over a deck to shuffle it.
-    All cards in a deck are facing the same way automatically.
-    --]]
     if button == "l" then
         if not holding then
             for i=#items,1,-1 do
@@ -152,18 +143,11 @@ function love.mousepressed(x, y, button)
                 insert(items, deck)
                 holding = false
             elseif items[item]:isInstanceOf(Deck) then
-                --TODO shuffle it into the deck
+                items[item]:shuffleIn(holding)
+                holding = false
             end
         end
-        --[[
-                --card on deck
-                "Scroll up to place card on top of deck, scroll down to place card on bottom of deck."
 
-                --deck over deck
-                "Scroll up to add this deck on top, scroll down to add this deck on bottom."
-                --deck over nothing
-                "Scroll to shuffle the deck."
-        ]]
     elseif button == "wu" then --WU AND WD ARE ALMOST IDENTICAL, COLLAPSE THEM INTO ONE WHERE POSSIBLE
         if not holding then
             for i=#items,1,-1 do --ABSTRACT THIS FOR, I DO IT TOO MUCH ?
@@ -173,9 +157,24 @@ function love.mousepressed(x, y, button)
                 end
             end
         elseif holding:isInstanceOf(Card) then
-            --TODO easy
+            for i=#items,1,-1 do
+                if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
+                    items[i]:placeCardsOn(holding)
+                    holding = false
+                    break
+                end
+            end
         elseif holding:isInstanceOf(Deck) then
-            --TODO maybe harder
+            for i=#items,1,-1 do
+                if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
+                    items[i]:placeCardsOn(holding:getCards())
+                    holding = false
+                    break
+                end
+            end
+            if holding then --if we didn't just get rid of it...
+                holding:shuffleCards()
+            end
         end
     elseif button == "wd" then
         if not holding then
@@ -186,9 +185,24 @@ function love.mousepressed(x, y, button)
                 end
             end
         elseif holding:isInstanceOf(Card) then
-            --TODO easy
+            for i=#items,1,-1 do
+                if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
+                    items[i]:placeCardsUnder(holding)
+                    holding = false
+                    break
+                end
+            end
         elseif holding:isInstanceOf(Deck) then
-            --TODO maybe harder
+            for i=#items,1,-1 do
+                if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
+                    items[i]:placeCardsUnder(holding:getCards())
+                    holding = false
+                    break
+                end
+            end
+            if holding then --if we didn't just get rid of it...
+                holding:shuffleCards()
+            end
         end
     elseif button == "r" then
         if holding then
@@ -207,6 +221,10 @@ end
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
+    end
+
+    if key == "m" then
+        insert(items, makeDeck(true))
     end
 end
 
