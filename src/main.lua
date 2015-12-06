@@ -5,7 +5,7 @@ local insert = table.insert
 local lg = love.graphics
 local lm = love.mouse
 
-local inspect = require "lib.inspect"
+local inspect = require "lib.inspect" --NOTE DEBUG
 
 local items = {}
 
@@ -156,11 +156,13 @@ function love.mousepressed(x, y, button)
             elseif items[item]:isInstanceOf(Card) then
                 local card = table.remove(items, item)
                 local deck = Deck({card, holding})
-                --deck:moveTo(card.x, card.y)
-                deck:moveTo(card:getPosition())
-                print(inspect(deck)) --NOTE DBEUG
-                insert(items, deck)
-                holding = false
+                deck.face = card.face
+                holding = deck
+
+                --deck:moveTo(card:getPosition())
+                --print(inspect(deck)) --NOTE DBEUG
+                --insert(items, deck)
+                --holding = false
             elseif items[item]:isInstanceOf(Deck) then
                 items[item]:shuffleIn(holding)
                 holding = false
@@ -233,6 +235,15 @@ function love.mousepressed(x, y, button)
                     break
                 end
             end
+        end
+    end
+
+    -- this is stupid and I shouldn't have to do it this way (I think)
+    for i=#items,1,-1 do
+        if items[i]:isInstanceOf(Deck) and (#items[i].cards < 2) then
+            items[i].cards[1].face = items[i].face
+            items[i].cards[1]:moveTo(items[i]:getPosition())
+            items[i] = items[i].cards[1] --should delete the Deck since no references..or at least hide it away forever..yay memory leaks?
         end
     end
 end

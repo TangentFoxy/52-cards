@@ -12,7 +12,6 @@ Deck.static.height = 89*2
 
 function Deck:initialize(cards)
     self.cards = cards or {}
-    print(self.cards) --NOTE DEBUG
     self.x = 0
     self.y = 0
     self.r = 0
@@ -76,18 +75,49 @@ end
 --TODO ? placeIn() to randomly place within without shuffling whole deck?
 
 function Deck:drawCards(count)
+    if #self.cards < 2 then
+        --return self as card (may break!?)
+        --self = self.cards[1]
+        return self
+    end
+
+    if count and (count > 1) then
+        if count >= #self.cards then
+            return self
+        end
+
+        local new = {}
+
+        for i=1,count do
+            insert(new, remove(self.cards))
+        end
+
+        local deck = Deck(new)
+        deck.face = self.face
+        return deck
+    else
+        --[[
+        if #self.cards == 1 then
+            return self
+        end
+        --]]
+        local card = remove(self.cards)
+        card.face = self.face
+        return card
+    end
+    --[[
     if count and (count > 1) then
         local new = {}
 
         while (count > 1) and (#self.cards > 0) do
-            local card = remove(self.cards)
-            card.face = self.face
-            insert(new, card)
+            insert(new, remove(self.cards))
+            count = count - 1
         end
 
-        self:update()
+        local deck = Deck(new)
+        deck.face = self.face
 
-        return Deck(new)
+        return deck
     else
         local card = remove(self.cards)
         card.face = self.face
@@ -96,13 +126,18 @@ function Deck:drawCards(count)
 
         return card
     end
+    --]]
 end
 
 --on top of deck
 function Deck:placeCardsOn(cards)
-    if type(cards) == "table" then
-        for _, card in ipairs(cards) do
-            insert(self.cards, card)
+    --if type(cards) == "table" then
+    --    for _, card in ipairs(cards) do
+    --        insert(self.cards, card)
+    --    end
+    if cards:isInstanceOf(Deck) then
+        for i=1,#cards.cards do
+            insert(self.cards, cards.cards[i])
         end
     else
         insert(self.cards, cards)
@@ -111,23 +146,17 @@ end
 
 --on bottom of deck
 function Deck:placeCardsUnder(cards)
-    if type(cards) == "table" then
-        for _, card in ipairs(cards) do
-            insert(self.cards, card, 1)
+    if cards:isInstanceOf(Deck) then
+        for i=1,#cards.cards do
+            insert(self.cards, 1, cards.cards[i])
         end
     else
-        insert(self.cards, cards, 1)
+        insert(self.cards, 1, cards)
     end
 end
 
 function Deck:getCards()
     return self.cards
-end
-
-function Deck:update()
-    if #self.cards < 2 then
-        self = self.cards[1] --turn into a Card (no idea if this will break anything Oo)
-    end
 end
 
 return Deck
