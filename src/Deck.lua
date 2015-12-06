@@ -78,9 +78,15 @@ function Deck:drawCards(count)
             insert(new, remove(self.cards))
         end
 
+        self:update()
+
         return Deck(new)
     else
-        return remove(self.cards)
+        local card = remove(self.cards)
+
+        self:update()
+
+        return card
     end
 end
 
@@ -108,6 +114,12 @@ end
 
 function Deck:getCards()
     return self.cards
+end
+
+function Deck:update()
+    if #self.cards < 2 then
+        self = self.cards[1] --turn into a Card (no idea if this will break anything Oo)
+    end
 end
 
 return Deck

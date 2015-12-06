@@ -69,7 +69,7 @@ function love.draw()
     --All cards in a deck are facing the same way automatically.
     if not holding then
         --not holading anything
-        lg.print("Left click to grab a card or deck. Scroll over a deck to shuffle it. Right click to flip a card or the cards in a deck.", 2, lg.getHeight() - 14)
+        lg.print("Left click to grab a card or draw a card. Scroll down over a deck to shuffle it, scroll up to pick up a deck. Right click to flip a card or the cards in a deck.", 2, lg.getHeight() - 14)
     else
         local hovering = false
 
@@ -116,7 +116,10 @@ function love.mousepressed(x, y, button)
         if not holding then
             for i=#items,1,-1 do
                 if isOnItem(x, y, items[i]) then
-                    holding = table.remove(items, i)
+                    if items[i]:isInstanceOf(Card) then
+                        holding = table.remove(items, i)
+                    else
+                        holding = items[i]:drawCards(1)
                     break
                 end
             end
@@ -158,12 +161,12 @@ function love.mousepressed(x, y, button)
                 holding = false
             end
         end
-
     elseif button == "wu" then --WU AND WD ARE ALMOST IDENTICAL, COLLAPSE THEM INTO ONE WHERE POSSIBLE
         if not holding then
             for i=#items,1,-1 do --ABSTRACT THIS FOR, I DO IT TOO MUCH ?
                 if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
-                    items[i]:shuffleCards()
+                    --items[i]:shuffleCards() -- now we pick it up instead!
+                    holding = table.remove(items, i)
                     break
                 end
             end
