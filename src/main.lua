@@ -5,8 +5,9 @@ local insert = table.insert
 local lg = love.graphics
 local lm = love.mouse
 
-local items = {}
+local inspect = require "lib.inspect"
 
+local items = {}
 
 local function makeDeck(jokers)
     local cards = {}
@@ -120,6 +121,7 @@ function love.mousepressed(x, y, button)
                         holding = table.remove(items, i)
                     else
                         holding = items[i]:drawCards(1)
+                    end
                     break
                 end
             end
@@ -154,6 +156,9 @@ function love.mousepressed(x, y, button)
             elseif items[item]:isInstanceOf(Card) then
                 local card = table.remove(items, item)
                 local deck = Deck({card, holding})
+                --deck:moveTo(card.x, card.y)
+                deck:moveTo(card:getPosition())
+                print(inspect(deck)) --NOTE DBEUG
                 insert(items, deck)
                 holding = false
             elseif items[item]:isInstanceOf(Deck) then

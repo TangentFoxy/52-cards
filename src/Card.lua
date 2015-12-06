@@ -61,6 +61,10 @@ function Card:moveTo(x, y, r)
     self.r = r or self.r
 end
 
+function Card:getPosition()
+    return self.x, self.y, self.r
+end
+
 function Card:flip()
     if self.face == "down" then
         self.face = "up"

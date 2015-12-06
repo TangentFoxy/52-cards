@@ -12,6 +12,7 @@ Deck.static.height = 89*2
 
 function Deck:initialize(cards)
     self.cards = cards or {}
+    print(self.cards) --NOTE DEBUG
     self.x = 0
     self.y = 0
     self.r = 0
@@ -45,6 +46,10 @@ function Deck:moveTo(x, y, r)
     self.r = r or self.r
 end
 
+function Deck:getPosition()
+    return self.x, self.y, self.r
+end
+
 function Deck:flip()
     if self.face == "down" then
         self.face = "up"
@@ -74,8 +79,10 @@ function Deck:drawCards(count)
     if count and (count > 1) then
         local new = {}
 
-        while (count > 1) and (#self.cards > 1) do
-            insert(new, remove(self.cards))
+        while (count > 1) and (#self.cards > 0) do
+            local card = remove(self.cards)
+            card.face = self.face
+            insert(new, card)
         end
 
         self:update()
@@ -83,6 +90,7 @@ function Deck:drawCards(count)
         return Deck(new)
     else
         local card = remove(self.cards)
+        card.face = self.face
 
         self:update()
 
