@@ -29,12 +29,15 @@ local function makeDeck(jokers)
 end
 
 function love.load()
-    insert(items, makeDeck(true))
+    insert(items, makeDeck(false))
     items[1]:shuffleCards()
     items[1]:moveTo(lg.getWidth()/2, lg.getHeight()/2)
     items[2] = Card("", "Joker")
-    items[2]:moveTo(100, 100)
+    items[2]:moveTo(80, 100)
     items[2]:flip()
+    items[3] = Card("", "Joker")
+    items[3]:moveTo(85, 105)
+    items[3]:flip()
 end
 
 local holding = false -- we might be holding something!
@@ -254,7 +257,11 @@ function love.keypressed(key)
     end
 
     if key == "m" then
-        insert(items, makeDeck(true))
+        insert(items, makeDeck(false))
+    end
+    if key == "j" then
+        insert(items, Card("", "Joker"))
+        insert(items, Card("", "Joker"))
     end
 end
 
