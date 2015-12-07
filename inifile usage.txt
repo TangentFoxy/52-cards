@@ -1,0 +1,10 @@
+inifile = require "lib.inifile"
+
+something = inifile.parse("file.ini")
+inifile.save("file.ini", something)
+
+something = {
+    sections = {
+        keys = values
+    }
+}
