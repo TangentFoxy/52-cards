@@ -5,6 +5,19 @@ local insert = table.insert
 local lg = love.graphics
 local lm = love.mouse
 
+local LEFT_MOUSE, RIGHT_MOUSE
+
+if love.getVersion then
+  local _, minor = love.getVersion()
+  if minor == 10 then
+    LEFT_MOUSE = 1
+    RIGHT_MOUSE = 2
+  else
+    LEFT_MOUSE = "l"
+    RIGHT_MOUSE = "r"
+  end
+end
+
 local inspect = require "lib.inspect" --NOTE DEBUG
 
 local items = {}
@@ -113,10 +126,83 @@ function love.draw()
             end
         end
     end
+
+    if not love.getVersion then
+        lg.print("This toy is probably not compatible with the version of LOVE you are using!!", 2, 2)
+    end
+end
+
+local function wheelUP(x, y)
+    if not holding then
+        for i=#items,1,-1 do --ABSTRACT THIS FOR, I DO IT TOO MUCH ?
+            if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
+                --items[i]:shuffleCards() -- now we pick it up instead!
+                holding = table.remove(items, i)
+                break
+            end
+        end
+    elseif holding:isInstanceOf(Card) then
+        for i=#items,1,-1 do
+            if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
+                items[i]:placeCardsOn(holding)
+                holding = false
+                break
+            end
+        end
+    elseif holding:isInstanceOf(Deck) then
+        for i=#items,1,-1 do
+            if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
+                items[i]:placeCardsOn(holding:getCards())
+                holding = false
+                break
+            end
+        end
+        if holding then --if we didn't just get rid of it...
+            holding:shuffleCards()
+        end
+    end
+end
+
+local function wheelDOWN(x, y)
+    if not holding then
+        for i=#items,1,-1 do
+            if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
+                items[i]:shuffleCards()
+                break
+            end
+        end
+    elseif holding:isInstanceOf(Card) then
+        for i=#items,1,-1 do
+            if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
+                items[i]:placeCardsUnder(holding)
+                holding = false
+                break
+            end
+        end
+    elseif holding:isInstanceOf(Deck) then
+        for i=#items,1,-1 do
+            if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
+                items[i]:placeCardsUnder(holding:getCards())
+                holding = false
+                break
+            end
+        end
+        if holding then --if we didn't just get rid of it...
+            holding:shuffleCards()
+        end
+    end
+end
+
+function love.wheelmoved(x, y)
+    if y > 0 then
+        wheelUP(love.mouse.getX(), love.mouse.getY())
+    elseif y < 0 then
+        wheelDOWN(love.mouse.getX(), love.mouse.getY())
+    end
 end
 
 function love.mousepressed(x, y, button)
-    if button == "l" then
+    if button == LEFT_MOUSE then
         if not holding then
             for i=#items,1,-1 do
                 if isOnItem(x, y, items[i]) then
@@ -172,63 +258,10 @@ function love.mousepressed(x, y, button)
             end
         end
     elseif button == "wu" then --WU AND WD ARE ALMOST IDENTICAL, COLLAPSE THEM INTO ONE WHERE POSSIBLE
-        if not holding then
-            for i=#items,1,-1 do --ABSTRACT THIS FOR, I DO IT TOO MUCH ?
-                if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
-                    --items[i]:shuffleCards() -- now we pick it up instead!
-                    holding = table.remove(items, i)
-                    break
-                end
-            end
-        elseif holding:isInstanceOf(Card) then
-            for i=#items,1,-1 do
-                if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
-                    items[i]:placeCardsOn(holding)
-                    holding = false
-                    break
-                end
-            end
-        elseif holding:isInstanceOf(Deck) then
-            for i=#items,1,-1 do
-                if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
-                    items[i]:placeCardsOn(holding:getCards())
-                    holding = false
-                    break
-                end
-            end
-            if holding then --if we didn't just get rid of it...
-                holding:shuffleCards()
-            end
-        end
+        wheelUP(x, y)
     elseif button == "wd" then
-        if not holding then
-            for i=#items,1,-1 do
-                if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
-                    items[i]:shuffleCards()
-                    break
-                end
-            end
-        elseif holding:isInstanceOf(Card) then
-            for i=#items,1,-1 do
-                if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
-                    items[i]:placeCardsUnder(holding)
-                    holding = false
-                    break
-                end
-            end
-        elseif holding:isInstanceOf(Deck) then
-            for i=#items,1,-1 do
-                if isOnItem(x, y, items[i]) and items[i]:isInstanceOf(Deck) then
-                    items[i]:placeCardsUnder(holding:getCards())
-                    holding = false
-                    break
-                end
-            end
-            if holding then --if we didn't just get rid of it...
-                holding:shuffleCards()
-            end
-        end
-    elseif button == "r" then
+        wheelDOWN(x, y)
+    elseif button == RIGHT_MOUSE then
         if holding then
             holding:flip()
         else
